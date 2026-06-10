@@ -1,0 +1,43 @@
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+    background: #1e293b;
+}
+
+input {
+    width: 60%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+#toolList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.tool {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tool:hover {
+    background: #334155;
+}
+
+.ad-box {
+    margin: 30px;
+    padding: 20px;
+    border: 1px dashed gray;
+    text-align: center;
+}
