@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Counter – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav {
+            width: 100%;
+            background: #1e293b;
+            padding: 14px 24px;
+        }
+
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        nav a:hover { color: white; }
+
+        h1 {
+            margin: 36px 0 24px;
+            font-size: 22px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            padding: 0 16px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 240px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #f1f5f9;
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 16px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea::placeholder { color: #475569; }
+        textarea:focus { border-color: #3b82f6; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #60a5fa;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .stats-bottom {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card.small .stat-value {
+            font-size: 26px;
+            color: #a78bfa;
+        }
+
+        .clear-btn {
+            align-self: flex-end;
+            background: #334155;
+            color: #94a3b8;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .clear-btn:hover {
+            background: #475569;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+
+<h1>🔡 Word Counter</h1>
+
+<div class="container">
+    <textarea id="input" placeholder="여기에 텍스트를 입력하세요..." oninput="countAll()"></textarea>
+
+    <button class="clear-btn" onclick="clearText()">Clear</button>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="charWith">0</div>
+            <div class="stat-label">Characters<br>(spaces included)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="charWithout">0</div>
+            <div class="stat-label">Characters<br>(no spaces)</div>
+        </div>
+    </div>
+
+    <div class="stats-bottom">
+        <div class="stat-card small">
+            <div class="stat-value" id="wordCount">0</div>
+            <div class="stat-label">Words</div>
+        </div>
+        <div class="stat-card small">
+            <div class="stat-value" id="lineCount">0</div>
+            <div class="stat-label">Lines</div>
+        </div>
+        <div class="stat-card small">
+            <div class="stat-value" id="sentenceCount">0</div>
+            <div class="stat-label">Sentences</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function countAll() {
+        const text = document.getElementById("input").value;
+
+        // Characters with spaces
+        document.getElementById("charWith").textContent = text.length;
+
+        // Characters without spaces
+        document.getElementById("charWithout").textContent = text.replace(/\s/g, "").length;
+
+        // Words
+        const words = text.trim() === "" ? [] : text.trim().split(/\s+/);
+        document.getElementById("wordCount").textContent = words.length;
+
+        // Lines
+        const lines = text === "" ? 0 : text.split(/\n/).length;
+        document.getElementById("lineCount").textContent = lines;
+
+        // Sentences (. ! ? 기준)
+        const sentences = text.trim() === ""
+            ? 0
+            : text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+        document.getElementById("sentenceCount").textContent = sentences;
+    }
+
+    function clearText() {
+        document.getElementById("input").value = "";
+        countAll();
+    }
+</script>
+</body>
+</html>
