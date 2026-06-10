@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Counter</title>
+</head>
+<body style="background:#0f172a;color:white;text-align:center;padding:50px;">
+
+    <h1>Word Counter</h1>
+
+    <textarea id="text" oninput="count()" rows="6"></textarea>
+
+    <h2 id="result">0 words</h2>
+
+    <script>
+        function count(){
+            const text = document.getElementById("text").value;
+            const words = text.trim().split(/\s+/).filter(Boolean);
+            document.getElementById("result").innerText = words.length + " words";
+        }
+    </script>
+
+</body>
+</html>
