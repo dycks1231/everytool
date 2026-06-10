@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav {
+            width: 100%;
+            background: #1e293b;
+            padding: 14px 24px;
+        }
+
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        nav a:hover { color: white; }
+
+        h1 {
+            margin: 36px 0 24px;
+            font-size: 22px;
+            color: #e2e8f0;
+        }
+
+        .calc {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            width: 320px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        #display {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: right;
+            margin-bottom: 16px;
+        }
+
+        #expression {
+            font-size: 13px;
+            color: #64748b;
+            min-height: 18px;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        #result {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f1f5f9;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 18px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        button:active { transform: scale(0.93); }
+
+        .btn-num {
+            background: #334155;
+            color: white;
+        }
+
+        .btn-num:hover { background: #475569; }
+
+        .btn-op {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .btn-op:hover { background: #2563eb; }
+
+        .btn-clear {
+            background: #7f1d1d;
+            color: white;
+        }
+
+        .btn-clear:hover { background: #991b1b; }
+
+        .btn-eq {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-eq:hover { background: #16a34a; }
+
+        .btn-wide {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+
+<h1>🧮 Calculator</h1>
+
+<div class="calc">
+    <div id="display">
+        <div id="expression"></div>
+        <div id="result">0</div>
+    </div>
+    <div class="buttons">
+        <button class="btn-clear" onclick="clearAll()">AC</button>
+        <button class="btn-op"    onclick="toggleSign()">+/-</button>
+        <button class="btn-op"    onclick="percent()">%</button>
+        <button class="btn-op"    onclick="inputOp('/')">÷</button>
+
+        <button class="btn-num"   onclick="inputNum('7')">7</button>
+        <button class="btn-num"   onclick="inputNum('8')">8</button>
+        <button class="btn-num"   onclick="inputNum('9')">9</button>
+        <button class="btn-op"    onclick="inputOp('*')">×</button>
+
+        <button class="btn-num"   onclick="inputNum('4')">4</button>
+        <button class="btn-num"   onclick="inputNum('5')">5</button>
+        <button class="btn-num"   onclick="inputNum('6')">6</button>
+        <button class="btn-op"    onclick="inputOp('-')">−</button>
+
+        <button class="btn-num"   onclick="inputNum('1')">1</button>
+        <button class="btn-num"   onclick="inputNum('2')">2</button>
+        <button class="btn-num"   onclick="inputNum('3')">3</button>
+        <button class="btn-op"    onclick="inputOp('+')">+</button>
+
+        <button class="btn-num btn-wide" onclick="inputNum('0')">0</button>
+        <button class="btn-num"   onclick="inputDot()">.</button>
+        <button class="btn-eq"    onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    let current = "0";
+    let expression = "";
+    let justCalc = false;
+
+    const resEl  = document.getElementById("result");
+    const expEl  = document.getElementById("expression");
+
+    function updateDisplay() {
+        resEl.textContent = current;
+        expEl.textContent = expression;
+    }
+
+    function inputNum(n) {
+        if (justCalc) { current = n; expression = ""; justCalc = false; }
+        else current = current === "0" ? n : current + n;
+        updateDisplay();
+    }
+
+    function inputDot() {
+        if (justCalc) { current = "0."; expression = ""; justCalc = false; }
+        else if (!current.includes(".")) current += ".";
+        updateDisplay();
+    }
+
+    function inputOp(op) {
+        justCalc = false;
+        expression = current + " " + op;
+        current = "0";
+        updateDisplay();
+    }
+
+    function calculate() {
+        if (!expression) return;
+        try {
+            const full = expression + " " + current;
+            const val  = Function('"use strict"; return (' + full + ')')();
+            expEl.textContent = full + " =";
+            current   = parseFloat(val.toFixed(10)).toString();
+            expression = "";
+            justCalc  = true;
+            resEl.textContent = current;
+        } catch {
+            resEl.textContent = "Error";
+        }
+    }
+
+    function clearAll() {
+        current = "0"; expression = ""; justCalc = false;
+        updateDisplay();
+    }
+
+    function toggleSign() {
+        current = (parseFloat(current) * -1).toString();
+        updateDisplay();
+    }
+
+    function percent() {
+        current = (parseFloat(current) / 100).toString();
+        updateDisplay();
+    }
+
+    // Keyboard support
+    document.addEventListener("keydown", e => {
+        if ("0123456789".includes(e.key)) inputNum(e.key);
+        else if (e.key === ".")  inputDot();
+        else if (["+","-","*","/"].includes(e.key)) inputOp(e.key);
+        else if (e.key === "Enter" || e.key === "=") calculate();
+        else if (e.key === "Backspace") {
+            current = current.length > 1 ? current.slice(0,-1) : "0";
+            updateDisplay();
+        }
+        else if (e.key === "Escape") clearAll();
+    });
+
+    updateDisplay();
+</script>
+</body>
+</html>
