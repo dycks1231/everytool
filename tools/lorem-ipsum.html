@@ -1,0 +1,99 @@
+cat > /mnt/user-data/outputs/tools/lorem-ipsum.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorem Ipsum Generator – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: white; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        nav { width: 100%; background: #1e293b; padding: 14px 24px; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        nav a:hover { color: white; }
+        h1 { margin: 36px 0 24px; font-size: 22px; color: #e2e8f0; }
+        .container { width: 100%; max-width: 640px; padding: 0 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+        .controls { background: #1e293b; border-radius: 12px; padding: 20px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+        label { color: #94a3b8; font-size: 14px; }
+        .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+        select, input[type=number] { background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; padding: 8px 12px; font-size: 14px; outline: none; }
+        select:focus, input[type=number]:focus { border-color: #3b82f6; }
+        input[type=number] { width: 80px; }
+        .btn-gen { background: #1d4ed8; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; cursor: pointer; }
+        .btn-gen:hover { background: #2563eb; }
+        textarea { width: 100%; height: 280px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 14px; line-height: 1.7; padding: 16px; resize: vertical; outline: none; }
+        .btn-copy { background: #15803d; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 14px; cursor: pointer; align-self: flex-end; }
+        .btn-copy:hover { background: #16a34a; }
+    </style>
+</head>
+<body>
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+<h1>📄 Lorem Ipsum Generator</h1>
+<div class="container">
+    <div class="controls">
+        <div class="ctrl-group">
+            <label>Type</label>
+            <select id="genType">
+                <option value="paragraphs">Paragraphs</option>
+                <option value="sentences">Sentences</option>
+                <option value="words">Words</option>
+            </select>
+        </div>
+        <div class="ctrl-group">
+            <label>Amount</label>
+            <input type="number" id="amount" value="3" min="1" max="50">
+        </div>
+        <button class="btn-gen" onclick="generate()">Generate</button>
+    </div>
+    <textarea id="output" readonly placeholder="Click Generate to create Lorem Ipsum text..."></textarea>
+    <button class="btn-copy" onclick="copyText()">Copy</button>
+</div>
+<script>
+const words = ["lorem","ipsum","dolor","sit","amet","consectetur","adipiscing","elit","sed","do","eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua","enim","ad","minim","veniam","quis","nostrud","exercitation","ullamco","laboris","nisi","aliquip","ex","ea","commodo","consequat","duis","aute","irure","in","reprehenderit","voluptate","velit","esse","cillum","eu","fugiat","nulla","pariatur","excepteur","sint","occaecat","cupidatat","non","proident","sunt","culpa","qui","officia","deserunt","mollit","anim","id","est","laborum","curabitur","pretium","tincidunt","lacus","nunc","purus","accumsan","libero","vitae","diam","posuere","porttitor","at","varius","vel","pharetra","mi","nullam","feugiat","viverra","scelerisque","pulvinar","mattis","egestas","urna","augue","interdum","velit","laoreet","id","donec","ultrices","tincidunt","arcu"];
+function rnd(n) { return Math.floor(Math.random()*n); }
+function sentence() {
+    const len = 8 + rnd(10);
+    let w = [];
+    for(let i=0;i<len;i++) w.push(words[rnd(words.length)]);
+    w[0] = w[0].charAt(0).toUpperCase() + w[0].slice(1);
+    return w.join(' ') + '.';
+}
+function paragraph() {
+    const sents = 4 + rnd(4);
+    let s = [];
+    for(let i=0;i<sents;i++) s.push(sentence());
+    return s.join(' ');
+}
+function generate() {
+    const type = document.getElementById('genType').value;
+    const amt = parseInt(document.getElementById('amount').value) || 3;
+    let result = '';
+    if(type === 'paragraphs') {
+        let ps = [];
+        for(let i=0;i<amt;i++) ps.push(paragraph());
+        result = ps.join('\n\n');
+    } else if(type === 'sentences') {
+        let ss = [];
+        for(let i=0;i<amt;i++) ss.push(sentence());
+        result = ss.join(' ');
+    } else {
+        let ws = [];
+        for(let i=0;i<amt;i++) ws.push(words[rnd(words.length)]);
+        ws[0] = ws[0].charAt(0).toUpperCase() + ws[0].slice(1);
+        result = ws.join(' ') + '.';
+    }
+    document.getElementById('output').value = result;
+}
+function copyText() {
+    navigator.clipboard.writeText(document.getElementById('output').value).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+}
+generate();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "lorem-ipsum done"
