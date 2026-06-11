@@ -1,0 +1,114 @@
+cat > /mnt/user-data/outputs/tools/unit-converter.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: white; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        nav { width: 100%; background: #1e293b; padding: 14px 24px; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        nav a:hover { color: white; }
+        h1 { margin: 36px 0 24px; font-size: 22px; color: #e2e8f0; }
+        .container { width: 100%; max-width: 560px; padding: 0 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+        .tab-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tab { background: #1e293b; border: none; color: #94a3b8; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: background 0.15s; }
+        .tab.active { background: #1d4ed8; color: white; }
+        .tab:hover:not(.active) { background: #334155; }
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+        .row { display: flex; gap: 10px; align-items: center; }
+        input[type=number] { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; padding: 11px 14px; font-size: 16px; outline: none; }
+        input[type=number]:focus { border-color: #3b82f6; }
+        select { background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; padding: 11px 14px; font-size: 14px; outline: none; min-width: 130px; }
+        select:focus { border-color: #3b82f6; }
+        .result-box { background: #0f172a; border-radius: 10px; padding: 16px; text-align: center; }
+        .result-val { font-size: 28px; font-weight: bold; color: #60a5fa; }
+        .result-unit { font-size: 14px; color: #64748b; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+<h1>📏 Unit Converter</h1>
+<div class="container">
+    <div class="tab-bar">
+        <button class="tab active" onclick="setCategory('length',this)">Length</button>
+        <button class="tab" onclick="setCategory('weight',this)">Weight</button>
+        <button class="tab" onclick="setCategory('temperature',this)">Temperature</button>
+        <button class="tab" onclick="setCategory('area',this)">Area</button>
+        <button class="tab" onclick="setCategory('volume',this)">Volume</button>
+        <button class="tab" onclick="setCategory('speed',this)">Speed</button>
+        <button class="tab" onclick="setCategory('data',this)">Data</button>
+    </div>
+    <div class="card">
+        <div class="row">
+            <input type="number" id="valFrom" value="1" oninput="convert()">
+            <select id="unitFrom" onchange="convert()"></select>
+        </div>
+        <div class="row">
+            <select id="unitTo" onchange="convert()"></select>
+        </div>
+        <div class="result-box">
+            <div class="result-val" id="resultVal">—</div>
+            <div class="result-unit" id="resultUnit"></div>
+        </div>
+    </div>
+</div>
+<script>
+const categories = {
+    length: { units: ['Meter','Kilometer','Centimeter','Millimeter','Mile','Yard','Foot','Inch','Nautical Mile'],
+        toBase: [1,1000,0.01,0.001,1609.344,0.9144,0.3048,0.0254,1852] },
+    weight: { units: ['Kilogram','Gram','Milligram','Pound','Ounce','Ton','Stone'],
+        toBase: [1,0.001,0.000001,0.453592,0.0283495,1000,6.35029] },
+    area: { units: ['Square Meter','Square Kilometer','Square Mile','Square Foot','Acre','Hectare'],
+        toBase: [1,1e6,2589988.11,0.092903,4046.86,10000] },
+    volume: { units: ['Liter','Milliliter','Cubic Meter','Gallon (US)','Quart','Pint','Cup','Fluid Ounce'],
+        toBase: [1,0.001,1000,3.78541,0.946353,0.473176,0.236588,0.0295735] },
+    speed: { units: ['m/s','km/h','mph','Knot','ft/s'],
+        toBase: [1,0.277778,0.44704,0.514444,0.3048] },
+    data: { units: ['Byte','Kilobyte','Megabyte','Gigabyte','Terabyte','Bit'],
+        toBase: [1,1024,1048576,1073741824,1099511627776,0.125] },
+    temperature: { units: ['Celsius','Fahrenheit','Kelvin'], toBase: null }
+};
+let currentCat = 'length';
+function setCategory(cat, el) {
+    currentCat = cat;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const c = categories[cat];
+    ['unitFrom','unitTo'].forEach((id,i) => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = c.units.map((u,j) => `<option value="${j}">${u}</option>`).join('');
+        sel.value = i===1 ? 1 : 0;
+    });
+    convert();
+}
+function convertTemp(val, from, to) {
+    let celsius;
+    if(from===0) celsius=val;
+    else if(from===1) celsius=(val-32)/1.8;
+    else celsius=val-273.15;
+    if(to===0) return celsius;
+    if(to===1) return celsius*1.8+32;
+    return celsius+273.15;
+}
+function convert() {
+    const val = parseFloat(document.getElementById('valFrom').value);
+    const fi = parseInt(document.getElementById('unitFrom').value);
+    const ti = parseInt(document.getElementById('unitTo').value);
+    const c = categories[currentCat];
+    if(isNaN(val)) { document.getElementById('resultVal').textContent='—'; return; }
+    let result;
+    if(currentCat==='temperature') result = convertTemp(val,fi,ti);
+    else result = val * c.toBase[fi] / c.toBase[ti];
+    const display = Math.abs(result) < 0.0001 || Math.abs(result) > 1e9 ? result.toExponential(4) : parseFloat(result.toFixed(6)).toString();
+    document.getElementById('resultVal').textContent = display;
+    document.getElementById('resultUnit').textContent = c.units[ti];
+}
+setCategory('length', document.querySelector('.tab.active'));
+</script>
+</body>
+</html>
+HTMLEOF
+echo "unit-converter done"
