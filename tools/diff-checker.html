@@ -1,0 +1,90 @@
+cat > /mnt/user-data/outputs/tools/diff-checker.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diff Checker – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: white; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        nav { width: 100%; background: #1e293b; padding: 14px 24px; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        nav a:hover { color: white; }
+        h1 { margin: 36px 0 24px; font-size: 22px; color: #e2e8f0; }
+        .container { width: 100%; max-width: 900px; padding: 0 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+        .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .panel-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        textarea { width: 100%; height: 200px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; font-size: 13px; line-height: 1.6; padding: 14px; resize: vertical; outline: none; font-family: monospace; }
+        textarea:focus { border-color: #3b82f6; }
+        .btn-compare { background: #1d4ed8; color: white; border: none; border-radius: 10px; padding: 13px 0; font-size: 15px; cursor: pointer; width: 100%; }
+        .btn-compare:hover { background: #2563eb; }
+        .result { background: #1e293b; border-radius: 12px; padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; display: none; }
+        .added { background: #14532d; color: #86efac; display: block; padding: 0 8px; border-radius: 4px; }
+        .removed { background: #7f1d1d; color: #fca5a5; display: block; padding: 0 8px; border-radius: 4px; }
+        .unchanged { color: #64748b; display: block; padding: 0 8px; }
+        .stats { display: flex; gap: 16px; font-size: 13px; }
+        .stat-add { color: #86efac; } .stat-rem { color: #fca5a5; }
+        @media(max-width:600px) { .panels { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+<h1>🔍 Diff Checker</h1>
+<div class="container">
+    <div class="panels">
+        <div>
+            <div class="panel-label">Original</div>
+            <textarea id="textA" placeholder="Paste original text..."></textarea>
+        </div>
+        <div>
+            <div class="panel-label">Modified</div>
+            <textarea id="textB" placeholder="Paste modified text..."></textarea>
+        </div>
+    </div>
+    <button class="btn-compare" onclick="compare()">Compare</button>
+    <div class="stats" id="stats" style="display:none">
+        <span class="stat-add" id="addedCount"></span>
+        <span class="stat-rem" id="removedCount"></span>
+    </div>
+    <div class="result" id="result"></div>
+</div>
+<script>
+function lcs(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) {
+        dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j],dp[i][j-1]);
+    }
+    const diff = [];
+    let i=m,j=n;
+    while(i>0||j>0) {
+        if(i>0&&j>0&&a[i-1]===b[j-1]) { diff.unshift({type:'same',val:a[i-1]}); i--;j--; }
+        else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])) { diff.unshift({type:'add',val:b[j-1]}); j--; }
+        else { diff.unshift({type:'rem',val:a[i-1]}); i--; }
+    }
+    return diff;
+}
+function compare() {
+    const a = document.getElementById('textA').value.split('\n');
+    const b = document.getElementById('textB').value.split('\n');
+    const diff = lcs(a,b);
+    let html='', added=0, removed=0;
+    diff.forEach(d => {
+        const escaped = d.val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if(d.type==='add') { html+=`<span class="added">+ ${escaped}</span>`; added++; }
+        else if(d.type==='rem') { html+=`<span class="removed">- ${escaped}</span>`; removed++; }
+        else { html+=`<span class="unchanged">  ${escaped}</span>`; }
+    });
+    const res = document.getElementById('result');
+    res.innerHTML = html;
+    res.style.display = 'block';
+    document.getElementById('stats').style.display = 'flex';
+    document.getElementById('addedCount').textContent = `+${added} added`;
+    document.getElementById('removedCount').textContent = `-${removed} removed`;
+}
+</script>
+</body>
+</html>
+HTMLEOF
+echo "diff-checker done"
