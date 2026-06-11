@@ -1,0 +1,104 @@
+cat > /mnt/user-data/outputs/tools/bmi-calculator.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator – EveryTool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f172a; color: white; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        nav { width: 100%; background: #1e293b; padding: 14px 24px; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        nav a:hover { color: white; }
+        h1 { margin: 36px 0 24px; font-size: 22px; color: #e2e8f0; }
+        .container { width: 100%; max-width: 480px; padding: 0 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+        .tab-bar { display: flex; gap: 8px; }
+        .tab { flex: 1; background: #1e293b; border: none; color: #94a3b8; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .tab.active { background: #1d4ed8; color: white; }
+        .card { background: #1e293b; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 13px; color: #94a3b8; }
+        input[type=number] { background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; padding: 11px 14px; font-size: 16px; outline: none; width: 100%; }
+        input[type=number]:focus { border-color: #3b82f6; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button.calc-btn { background: #1d4ed8; color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; cursor: pointer; }
+        button.calc-btn:hover { background: #2563eb; }
+        .result-card { background: #0f172a; border-radius: 12px; padding: 20px; text-align: center; display: none; }
+        .bmi-val { font-size: 52px; font-weight: bold; }
+        .bmi-cat { font-size: 18px; margin-top: 4px; }
+        .bmi-range { font-size: 13px; color: #64748b; margin-top: 8px; }
+        .bar { height: 12px; border-radius: 6px; background: linear-gradient(to right,#3b82f6,#22c55e,#f59e0b,#ef4444); margin-top: 16px; position: relative; }
+        .bar-marker { position: absolute; top: -4px; width: 4px; height: 20px; background: white; border-radius: 2px; transform: translateX(-50%); }
+    </style>
+</head>
+<body>
+<nav><a href="../index.html">← Back to EveryTool</a></nav>
+<h1>⚖️ BMI Calculator</h1>
+<div class="container">
+    <div class="tab-bar">
+        <button class="tab active" onclick="setUnit('metric',this)">Metric (kg/cm)</button>
+        <button class="tab" onclick="setUnit('imperial',this)">Imperial (lb/in)</button>
+    </div>
+    <div class="card">
+        <div id="metricFields">
+            <div class="field"><label>Weight (kg)</label><input type="number" id="weightKg" placeholder="70" oninput="calcBMI()"></div>
+            <div class="field" style="margin-top:12px"><label>Height (cm)</label><input type="number" id="heightCm" placeholder="175" oninput="calcBMI()"></div>
+        </div>
+        <div id="imperialFields" style="display:none">
+            <div class="field"><label>Weight (lbs)</label><input type="number" id="weightLb" placeholder="154" oninput="calcBMI()"></div>
+            <div class="row2" style="margin-top:12px">
+                <div class="field"><label>Height (ft)</label><input type="number" id="heightFt" placeholder="5" oninput="calcBMI()"></div>
+                <div class="field"><label>Height (in)</label><input type="number" id="heightIn" placeholder="9" oninput="calcBMI()"></div>
+            </div>
+        </div>
+    </div>
+    <div class="result-card" id="resultCard">
+        <div class="bmi-val" id="bmiVal">—</div>
+        <div class="bmi-cat" id="bmiCat"></div>
+        <div class="bmi-range">Healthy range: 18.5 – 24.9</div>
+        <div class="bar"><div class="bar-marker" id="barMarker"></div></div>
+    </div>
+</div>
+<script>
+let unit = 'metric';
+function setUnit(u, el) {
+    unit = u;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('metricFields').style.display = u==='metric'?'block':'none';
+    document.getElementById('imperialFields').style.display = u==='imperial'?'block':'none';
+    calcBMI();
+}
+function calcBMI() {
+    let weight, height;
+    if(unit==='metric') {
+        weight = parseFloat(document.getElementById('weightKg').value);
+        height = parseFloat(document.getElementById('heightCm').value) / 100;
+    } else {
+        const lb = parseFloat(document.getElementById('weightLb').value);
+        const ft = parseFloat(document.getElementById('heightFt').value)||0;
+        const inches = parseFloat(document.getElementById('heightIn').value)||0;
+        weight = lb * 0.453592;
+        height = (ft*12 + inches) * 0.0254;
+    }
+    if(!weight||!height||height===0) { document.getElementById('resultCard').style.display='none'; return; }
+    const bmi = weight / (height*height);
+    let cat, color;
+    if(bmi<18.5) { cat='Underweight'; color='#3b82f6'; }
+    else if(bmi<25) { cat='Normal weight'; color='#22c55e'; }
+    else if(bmi<30) { cat='Overweight'; color='#f59e0b'; }
+    else { cat='Obese'; color='#ef4444'; }
+    const pct = Math.min(Math.max((bmi-10)/40*100, 0), 100);
+    document.getElementById('bmiVal').textContent = bmi.toFixed(1);
+    document.getElementById('bmiVal').style.color = color;
+    document.getElementById('bmiCat').textContent = cat;
+    document.getElementById('bmiCat').style.color = color;
+    document.getElementById('barMarker').style.left = pct+'%';
+    document.getElementById('resultCard').style.display = 'block';
+}
+</script>
+</body>
+</html>
+HTMLEOF
+echo "bmi-calculator done"
